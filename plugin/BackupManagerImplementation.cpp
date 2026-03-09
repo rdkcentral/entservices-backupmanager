@@ -1,7 +1,5 @@
 #include "BackupManagerImplementation.h"
 
-#include "UtilsJsonRpc.h"
-
 #define DEFAULT_BACKUP_PATH "/opt/secure/persistent/settings_backup/"
 #define DEFAULT_BACKUP_VARIANT "generic"
 

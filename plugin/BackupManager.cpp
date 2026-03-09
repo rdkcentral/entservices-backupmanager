@@ -46,7 +46,7 @@ namespace WPEFramework {
         _service = service;
         _service->AddRef();
         _service->Register(&_backupNotification);
-        _backup = _service->Root<Exchange::IBackupManager>(_connectionId, 5000, _T("BackupImplementation"));
+        _backup = _service->Root<Exchange::IBackupManager>(_connectionId, 5000, _T("BackupManagerImplementation"));
 
         if (nullptr != _backup)
         {

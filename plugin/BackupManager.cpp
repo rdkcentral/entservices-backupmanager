@@ -76,22 +76,22 @@ namespace WPEFramework {
                 uint32_t result = _configure->Configure(_service);
                 if (result != Core::ERROR_NONE)
                 {
-                    LOGERR("Failed to configure Backup plugin");
-                    message = _T("Backup could not be configured");
+                    LOGERR("Failed to configure BackupManager plugin");
+                    message = _T("BackupManager could not be configured");
                 }
             }
             else
             {
                 LOGERR("IConfiguration interface is not available");
-                message = _T("Backup could not be configured");
+                message = _T("BackupManager could not be configured");
             }
             // Invoking Plugin API register to wpeframework
             Exchange::JBackupManager::Register(*this, _backup);
         }
         else
         {
-            SYSLOG(Logging::Startup, (_T("Backup::Initialize: Failed to initialise Backup plugin")));
-            message = _T("Backup plugin could not be initialised");
+            SYSLOG(Logging::Startup, (_T("BackupManager::Initialize: Failed to initialise BackupManager plugin")));
+            message = _T("BackupManager plugin could not be initialised");
         }
         return message;
     }

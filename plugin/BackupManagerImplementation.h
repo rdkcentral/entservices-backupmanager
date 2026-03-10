@@ -1,3 +1,21 @@
+/*
+* If not stated otherwise in this file or this component's LICENSE file the
+* following copyright and licenses apply:
+*
+* Copyright 2026 RDK Management
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 
 #pragma once
 
@@ -9,9 +27,9 @@
 #include <com/com.h>
 #include <core/core.h>
 
-#include "UtilsLogging.h"
+#include <unordered_map>
 
-using namespace WPEFramework;
+#include "UtilsLogging.h"
 
 namespace WPEFramework {
 namespace Plugin {
@@ -84,10 +102,7 @@ namespace Plugin {
         PluginHost::IShell* _service;
         Core::Sink<MonitorObjects> _monitor;
         using BackupProviderContainer = std::unordered_map<string, Exchange::IBackupProvider*>;
-        BackupProviderContainer _backupProviders;
-        
-    public:
-        static BackupManagerImplementation* _instance;
+        BackupProviderContainer _backupProviders;        
     };
 } // namespace Plugin
 } // namespace WPEFramework

@@ -24,7 +24,16 @@ git clone --branch R4.4.1 https://github.com/rdkcentral/Thunder.git
 
 git clone --branch main https://github.com/rdkcentral/entservices-apis.git
 
-git clone https://$GITHUB_TOKEN@github.com/rdkcentral/entservices-testframework.git
+# Safely clone entservices-testframework without exposing GITHUB_TOKEN in logs
+xtrace_was_set=false
+case $- in
+    *x*) xtrace_was_set=true ;;
+esac
+set +x
+git -c http.extraheader="Authorization: Bearer ${GITHUB_TOKEN}" clone https://github.com/rdkcentral/entservices-testframework.git
+if [ "$xtrace_was_set" = true ]; then
+    set -x
+fi
 
 ############################
 # Build Thunder-Tools

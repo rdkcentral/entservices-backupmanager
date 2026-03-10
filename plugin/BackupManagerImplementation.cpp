@@ -48,12 +48,20 @@ namespace Plugin {
             _service = nullptr;
         }
 
+        Core::SafeSyncType<Core::CriticalSection> lock(_adminLock);
+
         BackupProviderContainer::const_iterator it = _backupProviders.cbegin();
         while (it != _backupProviders.cend())
-        {            
-            it->second->Release();
+        {
+            if ( it->second != nullptr)
+            {
+                it->second->Release();
+            }
             ++it;
         }
+
+         _backupProviders.clear();
+        
     }
 
     uint32_t BackupManagerImplementation::Configure(PluginHost::IShell* service)
@@ -69,25 +77,23 @@ namespace Plugin {
         return status;
     }
 
+    void BackupManagerImplementation::MakeContext(const Exchange::BackupContext &contextIn, Exchange::BackupContext &contextOut) const
+    {
+        contextOut.scenario = contextIn.scenario;
+        contextOut.persistentPath = !contextIn.persistentPath.empty() ? contextIn.persistentPath : DEFAULT_BACKUP_PATH;
+        contextOut.variant = !contextIn.variant.empty() ? contextIn.variant : DEFAULT_BACKUP_VARIANT;
+    }
+
     Core::hresult BackupManagerImplementation::BackupSettings(const Exchange::BackupContext& context)
     {
         LOGINFO("BackupSettings scenario [%d] with persistentPath [%s] and variant [%s]", context.scenario, context.persistentPath.c_str(), context.variant.c_str());
 
         Exchange::BackupContext providerContext = context;
-        if (providerContext.persistentPath.empty())
-        {
-            providerContext.persistentPath = DEFAULT_BACKUP_PATH;
-            LOGINFO("Using default backup path [%s]", providerContext.persistentPath.c_str());
-        }
-        if (providerContext.variant.empty())
-        {
-            providerContext.variant = DEFAULT_BACKUP_VARIANT;
-            LOGINFO("Using default backup variant [%s]", providerContext.variant.c_str());
-        } 
+        MakeContext(context, providerContext);
 
         if (access(providerContext.persistentPath.c_str(), W_OK) != 0)
         {
-            if (mkdir(providerContext.persistentPath.c_str(), 0755) != 0 || access(providerContext.persistentPath.c_str(), W_OK) != 0)
+            if (mkdir(providerContext.persistentPath.c_str(), 0700) != 0 || access(providerContext.persistentPath.c_str(), W_OK) != 0)
             {
                 LOGERR("Failed to create directory [%s] for backup data", providerContext.persistentPath.c_str());
                 return Core::ERROR_GENERAL;
@@ -110,16 +116,7 @@ namespace Plugin {
         LOGINFO("RestoreSettings scenario [%d] with persistentPath [%s] and variant [%s]", context.scenario, context.persistentPath.c_str(), context.variant.c_str());
  
         Exchange::BackupContext providerContext = context;
-        if (providerContext.persistentPath.empty())
-        {
-            providerContext.persistentPath = DEFAULT_BACKUP_PATH;
-            LOGINFO("Using default backup path [%s]", providerContext.persistentPath.c_str());
-        }
-        if (providerContext.variant.empty())
-        {
-            providerContext.variant = DEFAULT_BACKUP_VARIANT;
-            LOGINFO("Using default backup variant [%s]", providerContext.variant.c_str());
-        }
+        MakeContext(context, providerContext);
 
         Core::SafeSyncType<Core::CriticalSection> lock(_adminLock);
 
@@ -138,16 +135,7 @@ namespace Plugin {
         LOGINFO("DeleteBackup scenario [%d] with persistentPath [%s] and variant [%s]", context.scenario, context.persistentPath.c_str(), context.variant.c_str());
 
         Exchange::BackupContext providerContext = context;
-        if (providerContext.persistentPath.empty())
-        {
-            providerContext.persistentPath = DEFAULT_BACKUP_PATH;
-            LOGINFO("Using default backup path [%s]", providerContext.persistentPath.c_str());
-        }
-        if (providerContext.variant.empty())
-        {
-            providerContext.variant = DEFAULT_BACKUP_VARIANT;
-            LOGINFO("Using default backup variant [%s]", providerContext.variant.c_str());
-        }
+        MakeContext(context, providerContext);
 
         Core::SafeSyncType<Core::CriticalSection> lock(_adminLock);
 

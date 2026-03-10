@@ -96,6 +96,8 @@ namespace Plugin {
         void PluginDeactivated(const string& callsign, PluginHost::IShell* service);
         
     private:
+        void MakeContext(const Exchange::BackupContext &contextIn, Exchange::BackupContext &contextOut) const;
+        
         mutable Core::CriticalSection _adminLock;
         PluginHost::IShell* _service;
         Core::Sink<MonitorObjects> _monitor;

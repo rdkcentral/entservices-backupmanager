@@ -22,7 +22,7 @@ namespace WPEFramework {
     namespace Plugin {
         SERVICE_REGISTRATION(BackupManager, API_VERSION_NUMBER_MAJOR, API_VERSION_NUMBER_MINOR, API_VERSION_NUMBER_PATCH);
    
-    BackupManager::BackupManager() : _service(nullptr), _connectionId(0), _backup(nullptr), _backupNotification(this)
+    BackupManager::BackupManager() : _service(nullptr), _connectionId(0), _backup(nullptr), _configure(nullptr), _backupNotification(this)
     {
         SYSLOG(Logging::Startup, (_T("BackupManager Constructor")));
     }
@@ -39,6 +39,7 @@ namespace WPEFramework {
         ASSERT(nullptr != service);
         ASSERT(nullptr == _service);
         ASSERT(nullptr == _backup);
+        ASSERT(nullptr == _configure);
         ASSERT(0 == _connectionId);
 
         SYSLOG(Logging::Startup, (_T("BackupManager::Initialize: PID=%u"), getpid()));
@@ -87,6 +88,11 @@ namespace WPEFramework {
 
         if (nullptr != _backup)
         {
+            if (_configure != nullptr)
+            {
+                _configure->Release();
+                _configure = nullptr;
+            }
 
             Exchange::JBackupManager::Unregister(*this);
 
@@ -133,7 +139,7 @@ namespace WPEFramework {
 
     string BackupManager::Information() const
     {
-       return ("This BackupManager Plugin facilitates to manage Hotel checkout operations");
+       return ("This BackupManager Plugin provides backup and restore functionalities for other plugins.");
     }
 
     void BackupManager::Deactivated(RPC::IRemoteConnection* connection)

@@ -69,6 +69,8 @@ namespace Plugin {
             }
         }
 
+        Core::SafeSyncType<Core::CriticalSection> lock(_adminLock);
+
         BackupProviderContainer::const_iterator it = _backupProviders.cbegin();
         while (it != _backupProviders.cend())
         {
@@ -93,6 +95,8 @@ namespace Plugin {
             providerContext.variant = DEFAULT_BACKUP_VARIANT;
             LOGINFO("Using default backup variant [%s]", providerContext.variant.c_str());
         }
+
+        Core::SafeSyncType<Core::CriticalSection> lock(_adminLock);
 
         BackupProviderContainer::const_iterator it = _backupProviders.cbegin();
         while (it != _backupProviders.cend())
@@ -120,6 +124,8 @@ namespace Plugin {
             LOGINFO("Using default backup variant [%s]", providerContext.variant.c_str());
         }
 
+        Core::SafeSyncType<Core::CriticalSection> lock(_adminLock);
+
         BackupProviderContainer::const_iterator it = _backupProviders.cbegin();
         while (it != _backupProviders.cend())
         {            
@@ -132,6 +138,7 @@ namespace Plugin {
 
     void BackupManagerImplementation::PluginActivated(const string& callsign, PluginHost::IShell* service)
     {
+        Core::SafeSyncType<Core::CriticalSection> lock(_adminLock);
         BackupProviderContainer::iterator it = _backupProviders.find(callsign);
         if (it == _backupProviders.end())
         {
@@ -147,6 +154,7 @@ namespace Plugin {
 
     void BackupManagerImplementation::PluginDeactivated(const string& callsign, PluginHost::IShell* service)
     {
+        Core::SafeSyncType<Core::CriticalSection> lock(_adminLock);
         BackupProviderContainer::iterator it = _backupProviders.find(callsign);
         if (it != _backupProviders.end())
         {

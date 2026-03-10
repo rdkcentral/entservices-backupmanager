@@ -76,8 +76,6 @@ namespace Plugin {
         BackupManagerImplementation();
         ~BackupManagerImplementation() override;
 
-        static BackupManagerImplementation* instance(BackupManagerImplementation *backupImpl = nullptr);
-
         // We do not allow this plugin to be copied !!
         BackupManagerImplementation(const BackupManagerImplementation&) = delete;
         BackupManagerImplementation& operator=(const BackupManagerImplementation&) = delete;

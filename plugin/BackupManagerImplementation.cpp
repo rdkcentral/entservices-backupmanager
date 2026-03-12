@@ -91,24 +91,35 @@ namespace Plugin {
         Exchange::BackupContext providerContext = context;
         MakeContext(context, providerContext);
 
+        if (providerContext.persistentPath == DEFAULT_BACKUP_PATH 
+            && access(providerContext.persistentPath.c_str(), W_OK) != 0 
+            && mkdir(providerContext.persistentPath.c_str(), 0700) != 0)
+        {
+            LOGERR("Failed to create directory [%s] for backup data", providerContext.persistentPath.c_str());
+            return Core::ERROR_GENERAL;
+        }
+
         if (access(providerContext.persistentPath.c_str(), W_OK) != 0)
         {
-            if (mkdir(providerContext.persistentPath.c_str(), 0700) != 0 || access(providerContext.persistentPath.c_str(), W_OK) != 0)
-            {
-                LOGERR("Failed to create directory [%s] for backup data", providerContext.persistentPath.c_str());
-                return Core::ERROR_GENERAL;
-            }
+            LOGERR("Backup path [%s] is not accessible for writing", providerContext.persistentPath.c_str());
+            return Core::ERROR_INVALID_PARAMETER;
         }
 
         Core::SafeSyncType<Core::CriticalSection> lock(_adminLock);
 
+        uint32_t status = Core::ERROR_NONE;
         BackupProviderContainer::const_iterator it = _backupProviders.cbegin();
         while (it != _backupProviders.cend())
         {
-            it->second->Backup(providerContext);
+            if (it->second->Backup(providerContext) != Core::ERROR_NONE)
+            {
+                LOGERR("Backup failed for provider with callsign [%s]", it->first.c_str());
+                status = Core::ERROR_GENERAL;
+            }
+
             ++it;
         }
-        return Core::ERROR_NONE;
+        return status;
     }
 
     Core::hresult BackupManagerImplementation::RestoreSettings(const Exchange::BackupContext& context)
@@ -120,14 +131,19 @@ namespace Plugin {
 
         Core::SafeSyncType<Core::CriticalSection> lock(_adminLock);
 
+        uint32_t status = Core::ERROR_NONE;
         BackupProviderContainer::const_iterator it = _backupProviders.cbegin();
         while (it != _backupProviders.cend())
         {            
-            it->second->Restore(providerContext);
+            if (it->second->Restore(providerContext) != Core::ERROR_NONE)
+            {
+                LOGERR("Restore failed for provider with callsign [%s]", it->first.c_str());
+                status = Core::ERROR_GENERAL;
+            }   
             ++it;
         }
 
-        return Core::ERROR_NONE;
+        return status;
     }
 
     Core::hresult BackupManagerImplementation::DeleteBackup(const Exchange::BackupContext& context)
@@ -139,14 +155,20 @@ namespace Plugin {
 
         Core::SafeSyncType<Core::CriticalSection> lock(_adminLock);
 
+        uint32_t status = Core::ERROR_NONE;
         BackupProviderContainer::const_iterator it = _backupProviders.cbegin();
         while (it != _backupProviders.cend())
         {            
-            it->second->Delete(providerContext);
+            if (it->second->Delete(providerContext) != Core::ERROR_NONE)
+            {
+                LOGERR("Delete failed for provider with callsign [%s]", it->first.c_str());
+                status = Core::ERROR_GENERAL;
+                break;
+            }
             ++it;
         }
 
-        return Core::ERROR_NONE;
+        return status;
     }
 
     void BackupManagerImplementation::PluginActivated(const string& callsign, PluginHost::IShell* service)

@@ -60,14 +60,20 @@ class BackupManager : public PluginHost::IPlugin, public PluginHost::JSONRPC {
             INTERFACE_ENTRY(RPC::IRemoteConnection::INotification)
             END_INTERFACE_MAP
 
-            void Activated(RPC::IRemoteConnection *) override
+            void Activated(RPC::IRemoteConnection *connection) override
             {
-                LOGINFO("Backup Notification Activated");
+                if(_parent._connectionId == connection->Id())
+                {
+                    LOGINFO("Backup Notification Activated");
+                }
             }
 
             void Deactivated(RPC::IRemoteConnection *connection) override
             {
-                LOGINFO("Backup Notification Deactivated");
+                if(_parent._connectionId == connection->Id())
+                {
+                    LOGINFO("Backup Notification Deactivated");
+                }
                 _parent.Deactivated(connection);
             }
 

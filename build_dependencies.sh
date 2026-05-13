@@ -24,6 +24,10 @@ git clone --branch R4.4.1 https://github.com/rdkcentral/Thunder.git
 
 git clone --branch main https://github.com/rdkcentral/entservices-apis.git
 
+cd ..
+git clone --branch feature/RDKEMW-16743 https://github.com/rdkcentral/entservices-helpers.git
+cd "$GITHUB_WORKSPACE"
+
 # Safely clone entservices-testframework without exposing GITHUB_TOKEN in logs
 xtrace_was_set=false
 case $- in
@@ -94,6 +98,16 @@ cmake -G Ninja -S entservices-apis  -B build/entservices-apis \
 
 cmake --build build/entservices-apis --target install
 
+
+#############################
+# Build entservices-helpers
+echo "======================================================================================"
+echo "building entservices-helpers"
+cmake -G Ninja -S ../entservices-helpers -B build/entservices-helpers \
+    -DEXCEPTIONS_ENABLE=ON \
+    -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/install/usr" \
+    -DCMAKE_MODULE_PATH="$GITHUB_WORKSPACE/install/tools/cmake"
+cmake --build build/entservices-helpers --target install
 
 
 ############################

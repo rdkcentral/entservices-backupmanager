@@ -1,0 +1,22 @@
+diff -upr a/Tests/L1Tests/CMakeLists.txt b/Tests/L1Tests/CMakeLists.txt
+--- a/Tests/L1Tests/CMakeLists.txt	2026-05-08 20:37:30.000000000 +0300
++++ b/Tests/L1Tests/CMakeLists.txt	2026-05-13 16:53:50.436516846 +0300
+@@ -163,6 +163,18 @@ if(PLUGIN_BLUETOOTH)
+     target_link_libraries(${PROJECT_NAME} "${ENTSERVICES_REPO_L1TEST_LIB_PATH}/libWPEFrameworkL1TestsBT.so")
+ endif()
+ 
++#PLUGIN_ACCOUNT
++if(PLUGIN_ACCOUNT)
++    message(STATUS "linking libWPEFrameworkL1TestsAccount to RdkServicesL1Test target")
++    target_link_libraries(${PROJECT_NAME} "${ENTSERVICES_REPO_L1TEST_LIB_PATH}/libWPEFrameworkL1TestsAccount.so")
++endif()
++
++#PLUGIN_BACKUPMANAGER
++if(PLUGIN_BACKUPMANAGER)
++    message(STATUS "linking libWPEFrameworkL1TestsBackupManager to RdkServicesL1Test target")
++    target_link_libraries(${PROJECT_NAME} "${ENTSERVICES_REPO_L1TEST_LIB_PATH}/libWPEFrameworkL1TestsBackupManager.so")
++endif()
++
+ include(GoogleTest)
+ include_directories(${TEST_INC})
+ 

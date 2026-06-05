@@ -688,13 +688,6 @@ jobs:
           /tmp/block/sdb/device
           /dev/disk/by-id
           /dev &&
-          if [ ! -f mknod /dev/sda c 240 0 ]; then mknod /dev/sda c 240 0; fi &&
-          if [ ! -f mknod /dev/sda1 c 240 0 ]; then mknod /dev/sda1 c 240 0; fi &&
-          if [ ! -f mknod /dev/sda2 c 240 0 ]; then mknod /dev/sda2 c 240 0; fi &&
-          if [ ! -f mknod /dev/sdb c 240 0 ]; then mknod /dev/sdb c 240 0; fi &&
-          if [ ! -f mknod /dev/sdb1 c 240 0 ]; then mknod /dev/sdb1 c 240 0; fi &&
-          if [ ! -f mknod /dev/sdb2 c 240 0 ]; then mknod /dev/sdb2 c 240 0; fi
-          &&
           sudo touch
           /opt/standbyReason.txt
           /opt/tmtryoptout

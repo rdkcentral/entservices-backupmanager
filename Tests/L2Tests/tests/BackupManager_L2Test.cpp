@@ -7,6 +7,9 @@
 #include <mutex>
 #include <thread>
 
+#include <sys/stat.h>
+#include <sys/types.h>
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
@@ -123,8 +126,26 @@ public:
     }
 };
 
-TEST_F(BackupManager_L2Test, BackupSettings_Success)
+TEST_F(BackupManager_L2Test, BackupSettings_CustomPathFailure)
 {
+    EXPECT_TRUE(m_BackupManagerPlugin != nullptr);
+
+    if (!m_BackupManagerPlugin)
+    {
+        TEST_LOG("m_BackupManagerPlugin is NULL");
+        return;
+    }
+
+    Exchange::BackupContext context = DefaultContext();
+    // This custom path does not exist and should cause BackupSettings to fail with ERROR_INVALID_PARAMETER
+    context.persistentPath = "/tmp/persistent/settings_backup_cuustom/";
+    EXPECT_EQ(Core::ERROR_INVALID_PARAMETER, m_BackupManagerPlugin->BackupSettings(context));
+}
+
+TEST_F(BackupManager_L2Test, BackupAndRestoreSettings_Success)
+{
+    EXPECT_TRUE(m_BackupManagerPlugin != nullptr);
+
     if (!m_BackupManagerPlugin)
     {
         TEST_LOG("m_BackupManagerPlugin is NULL");
@@ -150,32 +171,6 @@ TEST_F(BackupManager_L2Test, BackupSettings_Success)
     Exchange::BackupContext context = DefaultContext();
     EXPECT_EQ(Core::ERROR_NONE, m_BackupManagerPlugin->BackupSettings(context));
     EXPECT_TRUE(Core::Directory(context.persistentPath.c_str()).Exists());
-}
-
-TEST_F(BackupManager_L2Test, RestoreSettings_CustomPathFailure)
-{
-    if (!m_BackupManagerPlugin)
-    {
-        TEST_LOG("m_BackupManagerPlugin is NULL");
-        return;
-    }
-
-    Exchange::BackupContext context = DefaultContext();
-    // This custom path does not exist and should cause RestoreSettings to fail with ERROR_INVALID_PARAMETER
-    context.persistentPath = "/tmp/persistent/settings_backup_cuustom/";
-    EXPECT_EQ(Core::ERROR_INVALID_PARAMETER, m_BackupManagerPlugin->BackupSettings(context));
-}
-
-TEST_F(BackupManager_L2Test, BackupSettings_CustomPathSuccess)
-{
-    if (!m_BackupManagerPlugin)
-    {
-        TEST_LOG("m_BackupManagerPlugin is NULL");
-        return;
-    }
-
-    JsonObject usersettingsParams;
-    JsonObject result;
 
     usersettingsParams["preferredLanguages"] = "es";
     EXPECT_EQ(InvokeServiceMethod("org.rdk.UserSettings", "setPreferredAudioLanguages", usersettingsParams, result), Core::ERROR_NONE);
@@ -183,7 +178,7 @@ TEST_F(BackupManager_L2Test, BackupSettings_CustomPathSuccess)
     usersettingsParams["contentPin"] = "1234";
     EXPECT_EQ(InvokeServiceMethod("org.rdk.UserSettings", "setContentPin", usersettingsParams, result), Core::ERROR_NONE);
 
-    Exchange::BackupContext context = DefaultContext();
+    context = DefaultContext();
     context.persistentPath = "/tmp/persistent/settings_backup_custom/";
     mkdir(context.persistentPath.c_str(), 0777);
     EXPECT_EQ(Core::ERROR_NONE, m_BackupManagerPlugin->BackupSettings(context));
@@ -196,19 +191,10 @@ TEST_F(BackupManager_L2Test, BackupSettings_CustomPathSuccess)
     
     context.variant = "variant2";
     EXPECT_EQ(Core::ERROR_NONE, m_BackupManagerPlugin->BackupSettings(context));
-}
-
-TEST_F(BackupManager_L2Test, RestoreSettings_Success)
-{
-    if (!m_BackupManagerPlugin)
-    {
-        TEST_LOG("m_BackupManagerPlugin is NULL");
-        return;
-    }
 
     Core::JSON::String resultString;
 
-    Exchange::BackupContext context = DefaultContext();    
+    context = DefaultContext();
     context.persistentPath = "/tmp/persistent/settings_backup_custom/";
     context.variant = "variant2";
     EXPECT_EQ(Core::ERROR_NONE, m_BackupManagerPlugin->RestoreSettings(context));   
@@ -250,6 +236,8 @@ TEST_F(BackupManager_L2Test, RestoreSettings_Success)
 
 TEST_F(BackupManager_L2Test, DeleteBackup_Success)
 {
+    EXPECT_TRUE(m_BackupManagerPlugin != nullptr);
+
     if (!m_BackupManagerPlugin)
     {
         TEST_LOG("m_BackupManagerPlugin is NULL");
@@ -258,19 +246,19 @@ TEST_F(BackupManager_L2Test, DeleteBackup_Success)
 
     Exchange::BackupContext context = DefaultContext();
     
-    EXPECT_EQ(Core::ERROR_NONE, m_BackupManagerPlugin->RestoreSettings(context));   
+    EXPECT_EQ(Core::ERROR_NONE, m_BackupManagerPlugin->BackupSettings(context));
     EXPECT_EQ(Core::ERROR_NONE, m_BackupManagerPlugin->DeleteBackup(context));
 
-    EXPECT_EQ(Core::ERROR_GENERAL, m_BackupManagerPlugin->RestoreSettings(context));   
+    EXPECT_EQ(Core::ERROR_GENERAL, m_BackupManagerPlugin->RestoreSettings(context));
     EXPECT_EQ(Core::ERROR_GENERAL, m_BackupManagerPlugin->DeleteBackup(context));
 
     context.persistentPath = "/tmp/persistent/settings_backup_custom/";
     context.variant = "variant2";
 
-    EXPECT_EQ(Core::ERROR_NONE, m_BackupManagerPlugin->RestoreSettings(context));   
+    EXPECT_EQ(Core::ERROR_NONE, m_BackupManagerPlugin->BackupSettings(context));
     EXPECT_EQ(Core::ERROR_NONE, m_BackupManagerPlugin->DeleteBackup(context));
 
-    EXPECT_EQ(Core::ERROR_GENERAL, m_BackupManagerPlugin->RestoreSettings(context));   
+    EXPECT_EQ(Core::ERROR_GENERAL, m_BackupManagerPlugin->RestoreSettings(context));
     EXPECT_EQ(Core::ERROR_GENERAL, m_BackupManagerPlugin->DeleteBackup(context));
 }
 

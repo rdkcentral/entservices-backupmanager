@@ -34,7 +34,7 @@ case $- in
     *x*) xtrace_was_set=true ;;
 esac
 set +x
-git -c http.extraheader="Authorization: Bearer ${GITHUB_TOKEN}" clone --branch 1.0.12 https://github.com/rdkcentral/entservices-testframework.git
+git -c http.extraheader="Authorization: Bearer ${GITHUB_TOKEN}" clone --branch 1.0.14 https://github.com/rdkcentral/entservices-testframework.git
 if [ "$xtrace_was_set" = true ]; then
     set -x
 fi

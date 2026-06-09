@@ -1,6 +1,5 @@
 #!/bin/bash
-
-#set -x
+set -x
 set -e
 ##############################
 GITHUB_WORKSPACE="${PWD}"
@@ -28,16 +27,7 @@ cd ..
 git clone --branch develop https://github.com/rdkcentral/entservices-helpers.git
 cd "$GITHUB_WORKSPACE"
 
-# Safely clone entservices-testframework without exposing GITHUB_TOKEN in logs
-xtrace_was_set=false
-case $- in
-    *x*) xtrace_was_set=true ;;
-esac
-set +x
-git -c http.extraheader="Authorization: Bearer ${GITHUB_TOKEN}" clone --branch 1.0.14 https://github.com/rdkcentral/entservices-testframework.git
-if [ "$xtrace_was_set" = true ]; then
-    set -x
-fi
+git clone --branch 1.0.15 https://$GITHUB_TOKEN@github.com/rdkcentral/entservices-testframework.git
 
 ############################
 # Build Thunder-Tools
@@ -98,7 +88,6 @@ cmake -G Ninja -S entservices-apis  -B build/entservices-apis \
 
 cmake --build build/entservices-apis --target install
 
-
 ############################
 # generating minimal mock headers
 cd $GITHUB_WORKSPACE/entservices-testframework/Tests
@@ -112,9 +101,7 @@ touch rdk/iarmbus/libIARM.h
 touch rdk/iarmbus/libIBus.h
 touch iarm.h
 cd $GITHUB_WORKSPACE
-
-
-#############################
+##############################
 # Build entservices-helpers
 echo "======================================================================================"
 echo "building entservices-helpers"
@@ -127,7 +114,6 @@ cmake --build build/entservices-helpers --target install
 
 
 ############################
-# generating extrnal headers
 cd $GITHUB_WORKSPACE
 cd entservices-testframework/Tests
 echo " Empty mocks creation to avoid compilation errors"

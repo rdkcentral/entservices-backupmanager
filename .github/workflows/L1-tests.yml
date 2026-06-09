@@ -16,8 +16,8 @@ env:
   REPO_NAME: "backupmanager"
   THUNDER_REF: "R4.4.1"
   INTERFACES_REF: "develop"
-  AUTOMATICS_UNAME: ${{ secrets.AUTOMATICS_UNAME}}
-  AUTOMATICS_PASSCODE: ${{ secrets. AUTOMATICS_PASSCODE}}
+  AUTOMATICS_UNAME: ${{ secrets.AUTOMATICS_UNAME }}
+  AUTOMATICS_PASSCODE: ${{ secrets.AUTOMATICS_PASSCODE }}
 
 jobs:
   L1-tests:
@@ -206,8 +206,9 @@ jobs:
           path: entservices-apis
           ref: ${{env.INTERFACES_REF}}
           #token : ${{ secrets.RDKCM_RDKE }}
-          run: rm -rf $GITHUB_WORKSPACE/entservices-apis/jsonrpc/DTV.json
 
+      - name: Remove DTV.json
+        run: rm -rf $GITHUB_WORKSPACE/entservices-apis/jsonrpc/DTV.json
       - name: Apply patches entservices-apis
         run: |
           cd $GITHUB_WORKSPACE/entservices-apis

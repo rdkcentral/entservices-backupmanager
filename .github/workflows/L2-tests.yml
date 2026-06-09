@@ -15,8 +15,8 @@ env:
   BUILD_TYPE: Debug
   THUNDER_REF: "R4.4.1"
   INTERFACES_REF: "develop"
-  AUTOMATICS_UNAME: ${{ secrets.AUTOMATICS_UNAME}}
-  AUTOMATICS_PASSCODE: ${{ secrets. AUTOMATICS_PASSCODE}}
+  AUTOMATICS_UNAME: ${{ secrets.AUTOMATICS_UNAME }}
+  AUTOMATICS_PASSCODE: ${{ secrets.AUTOMATICS_PASSCODE }}
 
 jobs:
   L2-tests:
@@ -124,7 +124,6 @@ jobs:
           ref: 1.0.15
 
       - name: Checkout googletest
-        if: steps.cache.outputs.cache-hit != 'true'
         uses: actions/checkout@v3
         with:
           repository: google/googletest
@@ -185,8 +184,9 @@ jobs:
           repository: rdkcentral/entservices-apis
           path: entservices-apis
           ref: ${{env.INTERFACES_REF}}
-          run: rm -rf $GITHUB_WORKSPACE/entservices-apis/jsonrpc/DTV.json
 
+      - name: Remove DTV.json
+        run: rm -rf $GITHUB_WORKSPACE/entservices-apis/jsonrpc/DTV.json
       - name: Apply patches entservices-apis
         run: |
           cd $GITHUB_WORKSPACE/entservices-apis
@@ -298,8 +298,8 @@ jobs:
         run: echo "TOOLCHAIN_FILE=$GITHUB_WORKSPACE/entservices-testframework/Tests/gcc-with-coverage.cmake" >> $GITHUB_ENV
 
       - name: Build googletest
-        if: steps.cache.outputs.cache-hit != 'true'
         run: >
+          cmake -G Ninja
           cmake -G Ninja
           -S "$GITHUB_WORKSPACE/googletest"
           -B build/googletest

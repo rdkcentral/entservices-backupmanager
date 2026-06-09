@@ -99,10 +99,13 @@ protected:
 class BackupManagerTestProvider : public BackupManagerTest {
 public:
     BackupManagerTestProvider() : BackupManagerTest() {
+        ON_CALL(service, QueryInterface(Exchange::IBackupProvider::ID))
+            .WillByDefault(::testing::Return(static_cast<void*>(&backupProviderMock)));
+
         Exchange::IBackupManager* backupManagerInterface = static_cast<Exchange::IBackupManager*>(plugin->QueryInterface(Exchange::IBackupManager::ID));
 
         if (backupManagerInterface != nullptr) {
-            static_cast<Plugin::BackupManagerImplementation*>(backupManagerInterface)->PluginActivated("TestBackupProvider", reinterpret_cast<WPEFramework::PluginHost::IShell*>(&backupProviderMock));
+            static_cast<Plugin::BackupManagerImplementation*>(backupManagerInterface)->PluginActivated("TestBackupProvider", &service);
         }
     }
 
@@ -110,7 +113,7 @@ public:
         Exchange::IBackupManager* backupManagerInterface = static_cast<Exchange::IBackupManager*>(plugin->QueryInterface(Exchange::IBackupManager::ID));
 
         if (backupManagerInterface != nullptr) {
-            static_cast<Plugin::BackupManagerImplementation*>(backupManagerInterface)->PluginDeactivated("TestBackupProvider", reinterpret_cast<WPEFramework::PluginHost::IShell*>(&backupProviderMock));
+            static_cast<Plugin::BackupManagerImplementation*>(backupManagerInterface)->PluginDeactivated("TestBackupProvider", &service);
         }
     }
 };

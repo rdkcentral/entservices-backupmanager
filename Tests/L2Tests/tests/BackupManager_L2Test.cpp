@@ -254,6 +254,7 @@ TEST_F(BackupManager_L2Test, DeleteBackup_Success)
 
     context.persistentPath = "/tmp/persistent/settings_backup_custom/";
     context.variant = "variant2";
+    mkdir(context.persistentPath.c_str(), 0777);
 
     EXPECT_EQ(Core::ERROR_NONE, m_BackupManagerPlugin->BackupSettings(context));
     EXPECT_EQ(Core::ERROR_NONE, m_BackupManagerPlugin->DeleteBackup(context));

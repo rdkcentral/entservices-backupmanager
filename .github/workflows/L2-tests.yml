@@ -300,7 +300,6 @@ jobs:
       - name: Build googletest
         run: >
           cmake -G Ninja
-          cmake -G Ninja
           -S "$GITHUB_WORKSPACE/googletest"
           -B build/googletest
           -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/install/usr"

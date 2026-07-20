@@ -21,6 +21,8 @@
 
 #include <unistd.h>
 #include <sys/stat.h>
+#include <cstdio>
+
 
 #define DEFAULT_BACKUP_PATH "/opt/secure/persistent/settings_backup/"
 #define DEFAULT_BACKUP_VARIANT "generic"
@@ -73,6 +75,9 @@ namespace Plugin {
         _service->AddRef();
 
         _service->Register(&_monitor);
+
+        std::printf("[Backupmanager] Configure called %s \n");
+
 
         return status;
     }

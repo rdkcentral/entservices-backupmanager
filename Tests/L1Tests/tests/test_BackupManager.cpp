@@ -185,3 +185,28 @@ TEST_F(BackupManagerTest, DeleteBackupNoProviders)
 {
     EXPECT_EQ(Core::ERROR_NONE, handler.Invoke(connection, _T("deleteBackup"), _T("{\"context\":{\"scenario\":\"HOSPITALITY_RESET\"}}"), response));
 }
+
+// Path traversal security tests
+TEST_F(BackupManagerTest, BackupSettingsPathTraversalAttack)
+{
+    // Test path traversal attempt with ../ sequences
+    EXPECT_EQ(Core::ERROR_INVALID_PARAMETER, handler.Invoke(connection, _T("backupSettings"), _T("{\"context\":{\"scenario\":\"HOSPITALITY_RESET\", \"persistentPath\":\"/opt/secure/persistent/settings_backup/../../../etc/\"}}"), response));
+}
+
+TEST_F(BackupManagerTest, BackupSettingsAbsolutePathOutsideAllowed)
+{
+    // Test absolute path outside the allowed directory
+    EXPECT_EQ(Core::ERROR_INVALID_PARAMETER, handler.Invoke(connection, _T("backupSettings"), _T("{\"context\":{\"scenario\":\"HOSPITALITY_RESET\", \"persistentPath\":\"/tmp/pwned_backup/\"}}"), response));
+}
+
+TEST_F(BackupManagerTest, RestoreSettingsPathTraversalAttack)
+{
+    // Test path traversal attempt with ../ sequences
+    EXPECT_EQ(Core::ERROR_INVALID_PARAMETER, handler.Invoke(connection, _T("restoreSettings"), _T("{\"context\":{\"scenario\":\"HOSPITALITY_RESET\", \"persistentPath\":\"/opt/secure/persistent/settings_backup/../../../etc/\"}}"), response));
+}
+
+TEST_F(BackupManagerTest, DeleteBackupPathTraversalAttack)
+{
+    // Test path traversal attempt with ../ sequences
+    EXPECT_EQ(Core::ERROR_INVALID_PARAMETER, handler.Invoke(connection, _T("deleteBackup"), _T("{\"context\":{\"scenario\":\"HOSPITALITY_RESET\", \"persistentPath\":\"/opt/secure/persistent/settings_backup/../../../etc/\"}}"), response));
+}

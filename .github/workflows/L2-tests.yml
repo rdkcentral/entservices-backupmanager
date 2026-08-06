@@ -307,7 +307,7 @@ jobs:
           -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/install/usr"
           -DCMAKE_MODULE_PATH="$GITHUB_WORKSPACE/install/tools/cmake"
           -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
- -DCMAKE_CXX_FLAGS="
+          -DCMAKE_CXX_FLAGS="
           -I $GITHUB_WORKSPACE/entservices-testframework/Tests/headers
           -I $GITHUB_WORKSPACE/install/usr/include"
           &&
@@ -332,7 +332,7 @@ jobs:
           -DUSE_THUNDER_R4=ON
           -DHIDE_NON_EXTERNAL_SYMBOLS=OFF
           -DPLUGIN_HELPERS=ON
- -DCMAKE_CXX_FLAGS="
+          -DCMAKE_CXX_FLAGS="
           -I$GITHUB_WORKSPACE/entservices-testframework/Tests/headers
           -I$GITHUB_WORKSPACE/entservices-testframework/Tests/headers/rdk/iarmbus
           -I$GITHUB_WORKSPACE/entservices-testframework/Tests/mocks
@@ -352,7 +352,7 @@ jobs:
           -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/install/usr"
           -DCMAKE_MODULE_PATH="$GITHUB_WORKSPACE/install/tools/cmake"
           -DHIDE_NON_EXTERNAL_SYMBOLS=OFF
- -DCMAKE_CXX_FLAGS="
+          -DCMAKE_CXX_FLAGS="
           -DEXCEPTIONS_ENABLE=ON
           -fprofile-arcs
           -ftest-coverage
@@ -424,7 +424,7 @@ jobs:
           -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/install/usr"
           -DCMAKE_MODULE_PATH="$GITHUB_WORKSPACE/install/tools/cmake"
           -DHIDE_NON_EXTERNAL_SYMBOLS=OFF
- -DCMAKE_CXX_FLAGS="
+          -DCMAKE_CXX_FLAGS="
           -DEXCEPTIONS_ENABLE=ON
           -fprofile-arcs
           -ftest-coverage
@@ -495,7 +495,7 @@ jobs:
           -DCMAKE_MODULE_PATH="$GITHUB_WORKSPACE/install/tools/cmake"
           -DHIDE_NON_EXTERNAL_SYMBOLS=OFF
           -DPLUGIN_CLOUDSTORE_URI="localhost:50051"
- -DCMAKE_CXX_FLAGS="
+          -DCMAKE_CXX_FLAGS="
           -DEXCEPTIONS_ENABLE=ON
           -fprofile-arcs
           -ftest-coverage
@@ -576,7 +576,7 @@ jobs:
           -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/install/usr"
           -DCMAKE_MODULE_PATH="$GITHUB_WORKSPACE/install/tools/cmake"
           -DHIDE_NON_EXTERNAL_SYMBOLS=OFF
- -DCMAKE_CXX_FLAGS="
+          -DCMAKE_CXX_FLAGS="
           -DEXCEPTIONS_ENABLE=ON
           -fprofile-arcs
           -ftest-coverage

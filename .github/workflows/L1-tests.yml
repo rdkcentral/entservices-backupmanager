@@ -329,7 +329,7 @@ jobs:
           -DUSE_THUNDER_R4=ON
           -DHIDE_NON_EXTERNAL_SYMBOLS=OFF
           -DPLUGIN_HELPERS=ON
- -DCMAKE_CXX_FLAGS="
+          -DCMAKE_CXX_FLAGS="
           -I$GITHUB_WORKSPACE/entservices-testframework/Tests/headers
           -I$GITHUB_WORKSPACE/entservices-testframework/Tests/headers/rdk/iarmbus
           -I$GITHUB_WORKSPACE/entservices-testframework/Tests/mocks
@@ -352,7 +352,7 @@ jobs:
           -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/install/usr"
           -DCMAKE_MODULE_PATH="$GITHUB_WORKSPACE/install/tools/cmake"
           -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
- -DCMAKE_CXX_FLAGS="
+          -DCMAKE_CXX_FLAGS="
           -DEXCEPTIONS_ENABLE=ON
           -DTHUNDER_VERSION=4
           -DTHUNDER_VERSION_MAJOR=4
@@ -406,7 +406,7 @@ jobs:
           -B build/entservices-backupmanager
           -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/install/usr"
           -DCMAKE_MODULE_PATH="$GITHUB_WORKSPACE/install/tools/cmake"
- -DCMAKE_CXX_FLAGS="
+          -DCMAKE_CXX_FLAGS="
           -fprofile-arcs
           -ftest-coverage
           -DEXCEPTIONS_ENABLE=ON
@@ -486,7 +486,7 @@ jobs:
           -B build/entservices-testframework
           -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/install/usr"
           -DCMAKE_MODULE_PATH="$GITHUB_WORKSPACE/install/tools/cmake"
- -DCMAKE_CXX_FLAGS="
+          -DCMAKE_CXX_FLAGS="
           -fprofile-arcs
           -ftest-coverage
           -DEXCEPTIONS_ENABLE=ON

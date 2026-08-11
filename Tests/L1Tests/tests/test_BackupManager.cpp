@@ -44,7 +44,7 @@ public:
     MOCK_METHOD(uint32_t, Restore, (const Exchange::BackupContext& context), (override));
     MOCK_METHOD(uint32_t, Delete, (const Exchange::BackupContext& context), (override));
 
-    MOCK_METHOD(void, AddRef, (), (const, override));
+    MOCK_METHOD(uint32_t, AddRef, (), (const, override));
     MOCK_METHOD(uint32_t, Release, (), (const, override));
     MOCK_METHOD(void*, QueryInterface, (const uint32_t interfaceId), (override));
 };

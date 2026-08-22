@@ -97,6 +97,7 @@ namespace Plugin {
         
     private:
         void MakeContext(const Exchange::BackupContext &contextIn, Exchange::BackupContext &contextOut) const;
+        string ValidateAndCanonicalizePath(const string& inputPath) const;
         
         mutable Core::CriticalSection _adminLock;
         PluginHost::IShell* _service;

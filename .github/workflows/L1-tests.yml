@@ -11,8 +11,8 @@ on:
 env:
   BUILD_TYPE: Debug
   REPO_NAME: "backupmanager"
-  THUNDER_TOOLS_COMMIT_SHA: "d5dd83c7c19c49c7f25c558c126500bd2d64f7a4"
-  THUNDER_COMMIT_SHA: "2c0fcc5529e7da734be558ca6efa05d934dcce31"
+  THUNDER_TOOLS_COMMIT_SHA: "26471c50282bb07a6305a7db27ac69bd339a2337" # R5.3.0 + entservices-apis fixes
+  THUNDER_COMMIT_SHA: "ca7ad203398b3f065f9f494b89bc12038cd24f95" # R5.3.0
   INTERFACES_REF: "develop"
   AUTOMATICS_UNAME: ${{ secrets.AUTOMATICS_UNAME }}
   AUTOMATICS_PASSCODE: ${{ secrets.AUTOMATICS_PASSCODE }}
@@ -48,7 +48,7 @@ jobs:
             build/entservices-apis
             build/ThunderTools
             install
-            !install/etc/WPEFramework/plugins
+            !install/etc/Thunder/plugins
             !install/usr/bin/RdkServicesTest
             !install/usr/include/gmock
             !install/usr/include/gtest
@@ -61,7 +61,7 @@ jobs:
             !install/usr/lib/pkgconfig/gmock_main.pc
             !install/usr/lib/pkgconfig/gtest.pc
             !install/usr/lib/pkgconfig/gtest_main.pc
-            !install/usr/lib/wpeframework/plugins
+            !install/usr/lib/thunder/plugins
           key: ${{ runner.os }}--${{ env.REPO_NAME }}-${{ env.THUNDER_COMMIT_SHA }}-${{ env.INTERFACES_REF }}-4
 
       - name: Set up Python
@@ -326,7 +326,6 @@ jobs:
           -B build/entservices-helpers
           -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/install/usr"
           -DCMAKE_MODULE_PATH="$GITHUB_WORKSPACE/install/tools/cmake"
-          -DUSE_THUNDER_R4=ON
           -DHIDE_NON_EXTERNAL_SYMBOLS=OFF
           -DPLUGIN_HELPERS=ON
           -DCMAKE_CXX_FLAGS="
@@ -347,7 +346,6 @@ jobs:
           -B build/mocks
           -DBUILD_SHARED_LIBS=ON
           -DRDK_SERVICES_L1_TEST=ON
-          -DUSE_THUNDER_R4=ON
           -DCMAKE_TOOLCHAIN_FILE="${{ env.TOOLCHAIN_FILE }}"
           -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/install/usr"
           -DCMAKE_MODULE_PATH="$GITHUB_WORKSPACE/install/tools/cmake"
@@ -427,7 +425,7 @@ jobs:
           -I $GITHUB_WORKSPACE/entservices-testframework/Tests/headers/Dobby/Public/Dobby
           -I $GITHUB_WORKSPACE/entservices-testframework/Tests/headers/Dobby/IpcService
           -I $GITHUB_WORKSPACE/install/usr/include
-          -I $GITHUB_WORKSPACE/install/usr/include/WPEFramework
+          -I $GITHUB_WORKSPACE/install/usr/include/Thunder
           -I $GITHUB_WORKSPACE/entservices-helpers/helpers
           -include $GITHUB_WORKSPACE/entservices-testframework/Tests/mocks/devicesettings.h
           -include $GITHUB_WORKSPACE/entservices-testframework/Tests/mocks/Iarm.h
@@ -470,7 +468,6 @@ jobs:
           -DDS_FOUND=ON
           -DHAS_FRONT_PANEL=ON
           -DRDK_SERVICES_L1_TEST=ON
-          -DUSE_THUNDER_R4=ON
           -DHIDE_NON_EXTERNAL_SYMBOLS=OFF
           -DPLUGIN_BACKUPMANAGER=ON
           -DENABLE_UNIT_TESTS=ON
@@ -505,7 +502,7 @@ jobs:
           -I $GITHUB_WORKSPACE/entservices-testframework/Tests
           -I $GITHUB_WORKSPACE/install/usr/include
           -I ./usr/include/libdrm
-          -I $GITHUB_WORKSPACE/install/usr/include/WPEFramework
+          -I $GITHUB_WORKSPACE/install/usr/include/Thunder
           -include $GITHUB_WORKSPACE/entservices-testframework/Tests/mocks/devicesettings.h
           -include $GITHUB_WORKSPACE/entservices-testframework/Tests/mocks/Iarm.h
           -include $GITHUB_WORKSPACE/entservices-testframework/Tests/mocks/Rfc.h
@@ -540,7 +537,6 @@ jobs:
           -DDS_FOUND=ON
           -DPLUGIN_BACKUPMANAGER=ON
           -DRDK_SERVICES_L1_TEST=ON
-          -DUSE_THUNDER_R4=ON
           -DHIDE_NON_EXTERNAL_SYMBOLS=OFF
           -DENABLE_UNIT_TESTS=ON
           &&
@@ -631,7 +627,7 @@ jobs:
       - name: Run unit tests without valgrind
         run: >
           PATH=$GITHUB_WORKSPACE/install/usr/bin:${PATH}
-          LD_LIBRARY_PATH=$GITHUB_WORKSPACE/install/usr/lib:$GITHUB_WORKSPACE/install/usr/lib/wpeframework/plugins:${LD_LIBRARY_PATH}
+          LD_LIBRARY_PATH=$GITHUB_WORKSPACE/install/usr/lib:$GITHUB_WORKSPACE/install/usr/lib/thunder/plugins:${LD_LIBRARY_PATH}
           GTEST_OUTPUT="json:$(pwd)/rdkL1TestResults.json"
           RdkServicesL1Test &&
           cp -rf $(pwd)/rdkL1TestResults.json $GITHUB_WORKSPACE/rdkL1TestResultsWithoutValgrind.json &&
@@ -641,7 +637,7 @@ jobs:
         if: ${{ !env.ACT && inputs.caller_source != 'testframework' }}
         run: >
           PATH=$GITHUB_WORKSPACE/install/usr/bin:${PATH}
-          LD_LIBRARY_PATH=$GITHUB_WORKSPACE/install/usr/lib:$GITHUB_WORKSPACE/install/usr/lib/wpeframework/plugins:${LD_LIBRARY_PATH}
+          LD_LIBRARY_PATH=$GITHUB_WORKSPACE/install/usr/lib:$GITHUB_WORKSPACE/install/usr/lib/thunder/plugins:${LD_LIBRARY_PATH}
           GTEST_OUTPUT="json:$(pwd)/rdkL1TestResults.json"
           valgrind
           --tool=memcheck

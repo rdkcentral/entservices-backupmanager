@@ -13,7 +13,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-using namespace WPEFramework;
+using namespace Thunder;
 
 class BackupManager_L2Test : public L2TestMocks {
 protected:
@@ -74,9 +74,6 @@ public:
             Core::ProxyType<Core::IIPCServer>(BackupManager_Engine));
 
         TEST_LOG("Creating BackupManager_Engine Announcements");
-#if ((THUNDER_VERSION == 2) || ((THUNDER_VERSION == 4) && (THUNDER_VERSION_MINOR == 2)))
-        BackupManager_Engine->Announcements(BackupManager_Client->Announcement());
-#endif
 
         if (!BackupManager_Client.IsValid()) {
             TEST_LOG("Invalid BackupManager_Client");

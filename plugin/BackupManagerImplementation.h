@@ -31,7 +31,7 @@
 
 #include "UtilsLogging.h"
 
-namespace WPEFramework {
+namespace Thunder {
 namespace Plugin {
     class BackupManagerImplementation : public Exchange::IBackupManager, public Exchange::IConfiguration
     {
@@ -105,4 +105,4 @@ namespace Plugin {
         BackupProviderContainer _backupProviders;        
     };
 } // namespace Plugin
-} // namespace WPEFramework
+} // namespace Thunder

@@ -25,7 +25,7 @@
 #define DEFAULT_BACKUP_PATH "/opt/secure/persistent/settings_backup/"
 #define DEFAULT_BACKUP_VARIANT "generic"
 
-namespace WPEFramework {
+namespace Thunder {
 namespace Plugin {
 
     SERVICE_REGISTRATION(BackupManagerImplementation, 1, 0);
@@ -202,4 +202,4 @@ namespace Plugin {
 
 
 } // namespace Plugin
-} // namespace WPEFramework
+} // namespace Thunder

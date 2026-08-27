@@ -23,7 +23,7 @@
 #define API_VERSION_NUMBER_MINOR 0
 #define API_VERSION_NUMBER_PATCH 0
 
-namespace WPEFramework {
+namespace Thunder {
     namespace {
         static Plugin::Metadata<Plugin::BackupManager> metadata(
             API_VERSION_NUMBER_MAJOR,
@@ -85,7 +85,7 @@ namespace WPEFramework {
                 LOGERR("IConfiguration interface is not available");
                 message = _T("BackupManager could not be configured");
             }
-            // Invoking Plugin API register to wpeframework
+            // Invoking Plugin API register to thunder
             Exchange::JBackupManager::Register(*this, _backup);
         }
         else

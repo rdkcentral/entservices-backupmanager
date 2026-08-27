@@ -33,7 +33,7 @@
 #include "UtilsLogging.h"
 #include "tracing/Logging.h"
 
-namespace WPEFramework {
+namespace Thunder {
 namespace Plugin {
     
 class BackupManager : public PluginHost::IPlugin, public PluginHost::JSONRPC {
@@ -112,4 +112,4 @@ class BackupManager : public PluginHost::IPlugin, public PluginHost::JSONRPC {
 };
 
 } // namespace Plugin
-} // namespace WPEFramework
+} // namespace Thunder

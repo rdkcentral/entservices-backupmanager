@@ -33,7 +33,7 @@
 using ::testing::_;
 using ::testing::Invoke;
 using ::testing::NiceMock;
-using namespace WPEFramework;
+using namespace Thunder;
 
 class BackupProviderMock : public Exchange::IBackupProvider {
 public:

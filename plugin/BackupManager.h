@@ -108,7 +108,7 @@ class BackupManager : public PluginHost::IPlugin, public PluginHost::JSONRPC {
         uint32_t _connectionId;
         Exchange::IBackupManager* _backup;
         Exchange::IConfiguration* _configure;
-        Core::Sink<Notification> _backupNotification;
+        Core::SinkType<Notification> _backupNotification;
 };
 
 } // namespace Plugin

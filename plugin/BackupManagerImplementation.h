@@ -100,7 +100,7 @@ namespace Plugin {
         
         mutable Core::CriticalSection _adminLock;
         PluginHost::IShell* _service;
-        Core::Sink<MonitorObjects> _monitor;
+        Core::SinkType<MonitorObjects> _monitor;
         using BackupProviderContainer = std::unordered_map<string, Exchange::IBackupProvider*>;
         BackupProviderContainer _backupProviders;        
     };

@@ -21,12 +21,73 @@
 
 #include <unistd.h>
 #include <sys/stat.h>
+#include <limits.h>
+#include <stdlib.h>
+#include <cstring>
 
 #define DEFAULT_BACKUP_PATH "/opt/secure/persistent/settings_backup/"
 #define DEFAULT_BACKUP_VARIANT "generic"
 
 namespace WPEFramework {
 namespace Plugin {
+
+    // Validate backup path to prevent path traversal (RDKEMW-24515)
+    bool isValidBackupPath(const std::string& path)
+    {
+        if (path.empty())
+        {
+            return false;
+        }
+
+        // Reject path traversal sequences
+        if (path.find("..") != std::string::npos)
+        {
+            return false;
+        }
+
+        // Canonicalize the path to resolve symlinks
+        char resolvedPath[PATH_MAX];
+        if (realpath(path.c_str(), resolvedPath) == nullptr)
+        {
+            // Path doesn't exist - this is acceptable for paths that will be created
+            // but we should still validate the format
+            return true;
+        }
+
+        // Check if the resolved path is still within safe bounds
+        std::string resolved(resolvedPath);
+        if (resolved.find("..") != std::string::npos)
+        {
+            return false;
+        }
+
+        // Allow-listed safe prefixes for backup paths
+        const std::vector<std::string> safePrefixes = {
+            "/opt/",
+            "/tmp/",
+            "/var/tmp/"
+        };
+
+        // If the path is absolute, check it's within safe prefixes
+        if (path[0] == '/')
+        {
+            bool isSafePrefix = false;
+            for (const auto& prefix : safePrefixes)
+            {
+                if (path.compare(0, prefix.length(), prefix) == 0)
+                {
+                    isSafePrefix = true;
+                    break;
+                }
+            }
+            if (!isSafePrefix)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
 
     SERVICE_REGISTRATION(BackupManagerImplementation, 1, 0);
     
@@ -80,7 +141,18 @@ namespace Plugin {
     void BackupManagerImplementation::MakeContext(const Exchange::BackupContext &contextIn, Exchange::BackupContext &contextOut) const
     {
         contextOut.scenario = contextIn.scenario;
-        contextOut.persistentPath = !contextIn.persistentPath.empty() ? contextIn.persistentPath : DEFAULT_BACKUP_PATH;
+        
+        // Validate persistentPath to prevent path traversal (RDKEMW-24515)
+        if (!contextIn.persistentPath.empty() && !isValidBackupPath(contextIn.persistentPath))
+        {
+            LOGERR("Invalid persistentPath (traversal or unsafe): %s", contextIn.persistentPath.c_str());
+            contextOut.persistentPath = DEFAULT_BACKUP_PATH;
+        }
+        else
+        {
+            contextOut.persistentPath = !contextIn.persistentPath.empty() ? contextIn.persistentPath : DEFAULT_BACKUP_PATH;
+        }
+        
         contextOut.variant = !contextIn.variant.empty() ? contextIn.variant : DEFAULT_BACKUP_VARIANT;
     }
 

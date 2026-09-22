@@ -39,24 +39,14 @@ namespace Plugin {
             return false;
         }
 
-        // Reject path traversal sequences
-        if (path.find("..") != std::string::npos)
+        // Reject relative paths
+        if (path[0] != '/')
         {
             return false;
         }
 
-        // Canonicalize the path to resolve symlinks
-        char resolvedPath[PATH_MAX];
-        if (realpath(path.c_str(), resolvedPath) == nullptr)
-        {
-            // Path doesn't exist - this is acceptable for paths that will be created
-            // but we should still validate the format
-            return true;
-        }
-
-        // Check if the resolved path is still within safe bounds
-        std::string resolved(resolvedPath);
-        if (resolved.find("..") != std::string::npos)
+        // Reject path traversal sequences in lexical path
+        if (path.find("..") != std::string::npos)
         {
             return false;
         }
@@ -68,21 +58,51 @@ namespace Plugin {
             "/var/tmp/"
         };
 
-        // If the path is absolute, check it's within safe prefixes
-        if (path[0] == '/')
+        // Check if the lexical path starts with a safe prefix
+        bool isSafePrefix = false;
+        for (const auto& prefix : safePrefixes)
         {
-            bool isSafePrefix = false;
-            for (const auto& prefix : safePrefixes)
+            if (path.compare(0, prefix.length(), prefix) == 0)
             {
-                if (path.compare(0, prefix.length(), prefix) == 0)
-                {
-                    isSafePrefix = true;
-                    break;
-                }
+                isSafePrefix = true;
+                break;
             }
-            if (!isSafePrefix)
+        }
+        if (!isSafePrefix)
+        {
+            return false;
+        }
+
+        // If the path exists, validate it more strictly
+        struct stat pathStat;
+        if (lstat(path.c_str(), &pathStat) == 0)
+        {
+            // Reject symlinks
+            if (S_ISLNK(pathStat.st_mode))
             {
                 return false;
+            }
+
+            // Canonicalize the path to check the final destination
+            char resolvedPath[PATH_MAX];
+            if (realpath(path.c_str(), resolvedPath) != nullptr)
+            {
+                std::string resolved(resolvedPath);
+
+                // Ensure resolved path is still within safe prefixes
+                bool resolvedSafe = false;
+                for (const auto& prefix : safePrefixes)
+                {
+                    if (resolved.compare(0, prefix.length(), prefix) == 0)
+                    {
+                        resolvedSafe = true;
+                        break;
+                    }
+                }
+                if (!resolvedSafe)
+                {
+                    return false;
+                }
             }
         }
 

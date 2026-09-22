@@ -185,3 +185,41 @@ TEST_F(BackupManagerTest, DeleteBackupNoProviders)
 {
     EXPECT_EQ(Core::ERROR_NONE, handler.Invoke(connection, _T("deleteBackup"), _T("{\"context\":{\"scenario\":\"HOSPITALITY_RESET\"}}"), response));
 }
+
+// RDKEMW-24515: Path traversal regression tests
+TEST_F(BackupManagerTest, PathTraversalRejected)
+{
+    // Test path traversal sequences
+    EXPECT_EQ(Core::ERROR_INVALID_PARAMETER, handler.Invoke(connection, _T("backupSettings"), _T("{\"context\":{\"scenario\":\"HOSPITALITY_RESET\", \"persistentPath\":\"/opt/../../../etc/passwd\"}}"), response));
+    EXPECT_EQ(Core::ERROR_INVALID_PARAMETER, handler.Invoke(connection, _T("restoreSettings"), _T("{\"context\":{\"scenario\":\"HOSPITALITY_RESET\", \"persistentPath\":\"/tmp/../etc/shadow\"}}"), response));
+    EXPECT_EQ(Core::ERROR_INVALID_PARAMETER, handler.Invoke(connection, _T("deleteBackup"), _T("{\"context\":{\"scenario\":\"HOSPITALITY_RESET\", \"persistentPath\":\"/var/tmp/../../root/.ssh\"}}"), response));
+}
+
+TEST_F(BackupManagerTest, RelativePathRejected)
+{
+    // Test relative paths are rejected
+    EXPECT_EQ(Core::ERROR_INVALID_PARAMETER, handler.Invoke(connection, _T("backupSettings"), _T("{\"context\":{\"scenario\":\"HOSPITALITY_RESET\", \"persistentPath\":\"relative/path\"}}"), response));
+    EXPECT_EQ(Core::ERROR_INVALID_PARAMETER, handler.Invoke(connection, _T("restoreSettings"), _T("{\"context\":{\"scenario\":\"HOSPITALITY_RESET\", \"persistentPath\":\"../etc/passwd\"}}"), response));
+}
+
+TEST_F(BackupManagerTest, InvalidPrefixRejected)
+{
+    // Test paths outside allowed prefixes
+    EXPECT_EQ(Core::ERROR_INVALID_PARAMETER, handler.Invoke(connection, _T("backupSettings"), _T("{\"context\":{\"scenario\":\"HOSPITALITY_RESET\", \"persistentPath\":\"/etc/passwd\"}}"), response));
+    EXPECT_EQ(Core::ERROR_INVALID_PARAMETER, handler.Invoke(connection, _T("restoreSettings"), _T("{\"context\":{\"scenario\":\"HOSPITALITY_RESET\", \"persistentPath\":\"/root/.ssh\"}}"), response));
+    EXPECT_EQ(Core::ERROR_INVALID_PARAMETER, handler.Invoke(connection, _T("deleteBackup"), _T("{\"context\":{\"scenario\":\"HOSPITALITY_RESET\", \"persistentPath\":\"/home/user/.config\"}}"), response));
+}
+
+TEST_F(BackupManagerTest, ValidPathAccepted)
+{
+    // Test valid paths within allowed prefixes
+    EXPECT_EQ(Core::ERROR_NONE, handler.Invoke(connection, _T("backupSettings"), _T("{\"context\":{\"scenario\":\"HOSPITALITY_RESET\", \"persistentPath\":\"/opt/secure/persistent/settings_backup/\"}}"), response));
+    EXPECT_EQ(Core::ERROR_NONE, handler.Invoke(connection, _T("restoreSettings"), _T("{\"context\":{\"scenario\":\"HOSPITALITY_RESET\", \"persistentPath\":\"/tmp/backup/\"}}"), response));
+    EXPECT_EQ(Core::ERROR_NONE, handler.Invoke(connection, _T("deleteBackup"), _T("{\"context\":{\"scenario\":\"HOSPITALITY_RESET\", \"persistentPath\":\"/var/tmp/backup/\"}}"), response));
+}
+
+TEST_F(BackupManagerTest, EmptyPathDefaults)
+{
+    // Test empty path defaults to safe default
+    EXPECT_EQ(Core::ERROR_NONE, handler.Invoke(connection, _T("backupSettings"), _T("{\"context\":{\"scenario\":\"HOSPITALITY_RESET\", \"persistentPath\":\"\"}}"), response));
+}

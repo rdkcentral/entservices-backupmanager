@@ -180,6 +180,12 @@ namespace Plugin {
     {
         LOGINFO("BackupSettings scenario [%d] with persistentPath [%s] and variant [%s]", context.scenario, context.persistentPath.c_str(), context.variant.c_str());
 
+        if (!context.persistentPath.empty() && !isValidBackupPath(context.persistentPath))
+        {
+            LOGERR("Invalid persistentPath");
+            return Core::ERROR_INVALID_PARAMETER;
+        }
+
         Exchange::BackupContext providerContext = context;
         MakeContext(context, providerContext);
 
@@ -217,6 +223,12 @@ namespace Plugin {
     Core::hresult BackupManagerImplementation::RestoreSettings(const Exchange::BackupContext& context)
     {
         LOGINFO("RestoreSettings scenario [%d] with persistentPath [%s] and variant [%s]", context.scenario, context.persistentPath.c_str(), context.variant.c_str());
+
+        if (!context.persistentPath.empty() && !isValidBackupPath(context.persistentPath))
+        {
+            LOGERR("Invalid persistentPath");
+            return Core::ERROR_INVALID_PARAMETER;
+        }
  
         Exchange::BackupContext providerContext = context;
         MakeContext(context, providerContext);
@@ -241,6 +253,12 @@ namespace Plugin {
     Core::hresult BackupManagerImplementation::DeleteBackup(const Exchange::BackupContext& context)
     {
         LOGINFO("DeleteBackup scenario [%d] with persistentPath [%s] and variant [%s]", context.scenario, context.persistentPath.c_str(), context.variant.c_str());
+
+        if (!context.persistentPath.empty() && !isValidBackupPath(context.persistentPath))
+        {
+            LOGERR("Invalid persistentPath");
+            return Core::ERROR_INVALID_PARAMETER;
+        }
 
         Exchange::BackupContext providerContext = context;
         MakeContext(context, providerContext);

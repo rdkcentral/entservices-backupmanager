@@ -28,6 +28,7 @@ cmake -G Ninja -S "$GITHUB_WORKSPACE" -B build/entservices-backupmanager \
 -I ${GITHUB_WORKSPACE}/entservices-testframework/Tests/headers/rdk/halif/deepsleep-manager \
 -I ${GITHUB_WORKSPACE}/entservices-testframework/Tests/mocks \
 -I ${GITHUB_WORKSPACE}/entservices-testframework/Tests/mocks/thunder \
+-I ${GITHUB_WORKSPACE}/install/usr/include/wpeframework/helpers \
 -I ${GITHUB_WORKSPACE}/install/usr/include/thunder/helpers \
 -Wall -Werror -Wno-error=format \
 -Wl,-wrap,system -Wl,-wrap,popen -Wl,-wrap,syslog \

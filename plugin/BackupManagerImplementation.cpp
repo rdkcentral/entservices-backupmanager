@@ -20,10 +20,12 @@
 #include "BackupManagerImplementation.h"
 
 #include <unistd.h>
+#include <fcntl.h>
 #include <sys/stat.h>
 #include <limits.h>
 #include <stdlib.h>
 #include <cstring>
+#include <cerrno>
 
 #define DEFAULT_BACKUP_PATH "/opt/secure/persistent/settings_backup/"
 #define DEFAULT_BACKUP_VARIANT "generic"
@@ -74,36 +76,38 @@ namespace Plugin {
         }
 
         // If the path exists, validate it more strictly
-        struct stat pathStat;
-        if (lstat(path.c_str(), &pathStat) == 0)
+        const int pathFd = open(path.c_str(), O_RDONLY | O_NOFOLLOW | O_CLOEXEC);
+        if (pathFd >= 0)
         {
-            // Reject symlinks
-            if (S_ISLNK(pathStat.st_mode))
+            char resolvedPath[PATH_MAX];
+            const std::string descriptorPath = "/proc/self/fd/" + std::to_string(pathFd);
+            const ssize_t resolvedLength = readlink(descriptorPath.c_str(), resolvedPath, sizeof(resolvedPath) - 1);
+            close(pathFd);
+            if (resolvedLength < 0)
             {
                 return false;
             }
+            resolvedPath[resolvedLength] = '\0';
+            std::string resolved(resolvedPath);
 
-            // Canonicalize the path to check the final destination
-            char resolvedPath[PATH_MAX];
-            if (realpath(path.c_str(), resolvedPath) != nullptr)
+            // Ensure resolved path is still within safe prefixes
+            bool resolvedSafe = false;
+            for (const auto& prefix : safePrefixes)
             {
-                std::string resolved(resolvedPath);
-
-                // Ensure resolved path is still within safe prefixes
-                bool resolvedSafe = false;
-                for (const auto& prefix : safePrefixes)
+                if (resolved.compare(0, prefix.length(), prefix) == 0)
                 {
-                    if (resolved.compare(0, prefix.length(), prefix) == 0)
-                    {
-                        resolvedSafe = true;
-                        break;
-                    }
-                }
-                if (!resolvedSafe)
-                {
-                    return false;
+                    resolvedSafe = true;
+                    break;
                 }
             }
+            if (!resolvedSafe)
+            {
+                return false;
+            }
+        }
+        else if (errno != ENOENT)
+        {
+            return false;
         }
 
         return true;

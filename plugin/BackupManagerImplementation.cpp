@@ -20,13 +20,98 @@
 #include "BackupManagerImplementation.h"
 
 #include <unistd.h>
+#include <fcntl.h>
 #include <sys/stat.h>
+#include <limits.h>
+#include <stdlib.h>
+#include <cstring>
+#include <cerrno>
 
 #define DEFAULT_BACKUP_PATH "/opt/secure/persistent/settings_backup/"
 #define DEFAULT_BACKUP_VARIANT "generic"
 
 namespace WPEFramework {
 namespace Plugin {
+
+    // Validate backup path to prevent path traversal (RDKEMW-24515)
+    bool isValidBackupPath(const std::string& path)
+    {
+        if (path.empty())
+        {
+            return false;
+        }
+
+        // Reject relative paths
+        if (path[0] != '/')
+        {
+            return false;
+        }
+
+        // Reject path traversal sequences in lexical path
+        if (path.find("..") != std::string::npos)
+        {
+            return false;
+        }
+
+        // Allow-listed safe prefixes for backup paths
+        const std::vector<std::string> safePrefixes = {
+            "/opt/",
+            "/tmp/",
+            "/var/tmp/"
+        };
+
+        // Check if the lexical path starts with a safe prefix
+        bool isSafePrefix = false;
+        for (const auto& prefix : safePrefixes)
+        {
+            if (path.compare(0, prefix.length(), prefix) == 0)
+            {
+                isSafePrefix = true;
+                break;
+            }
+        }
+        if (!isSafePrefix)
+        {
+            return false;
+        }
+
+        // If the path exists, validate it more strictly
+        const int pathFd = open(path.c_str(), O_RDONLY | O_NOFOLLOW | O_CLOEXEC);
+        if (pathFd >= 0)
+        {
+            char resolvedPath[PATH_MAX];
+            const std::string descriptorPath = "/proc/self/fd/" + std::to_string(pathFd);
+            const ssize_t resolvedLength = readlink(descriptorPath.c_str(), resolvedPath, sizeof(resolvedPath) - 1);
+            close(pathFd);
+            if (resolvedLength < 0)
+            {
+                return false;
+            }
+            resolvedPath[resolvedLength] = '\0';
+            std::string resolved(resolvedPath);
+
+            // Ensure resolved path is still within safe prefixes
+            bool resolvedSafe = false;
+            for (const auto& prefix : safePrefixes)
+            {
+                if (resolved.compare(0, prefix.length(), prefix) == 0)
+                {
+                    resolvedSafe = true;
+                    break;
+                }
+            }
+            if (!resolvedSafe)
+            {
+                return false;
+            }
+        }
+        else if (errno != ENOENT)
+        {
+            return false;
+        }
+
+        return true;
+    }
 
     SERVICE_REGISTRATION(BackupManagerImplementation, 1, 0);
     
@@ -80,13 +165,30 @@ namespace Plugin {
     void BackupManagerImplementation::MakeContext(const Exchange::BackupContext &contextIn, Exchange::BackupContext &contextOut) const
     {
         contextOut.scenario = contextIn.scenario;
-        contextOut.persistentPath = !contextIn.persistentPath.empty() ? contextIn.persistentPath : DEFAULT_BACKUP_PATH;
+        
+        // Validate persistentPath to prevent path traversal (RDKEMW-24515)
+        if (!contextIn.persistentPath.empty() && !isValidBackupPath(contextIn.persistentPath))
+        {
+            LOGERR("Invalid persistentPath (traversal or unsafe): %s", contextIn.persistentPath.c_str());
+            contextOut.persistentPath = DEFAULT_BACKUP_PATH;
+        }
+        else
+        {
+            contextOut.persistentPath = !contextIn.persistentPath.empty() ? contextIn.persistentPath : DEFAULT_BACKUP_PATH;
+        }
+        
         contextOut.variant = !contextIn.variant.empty() ? contextIn.variant : DEFAULT_BACKUP_VARIANT;
     }
 
     Core::hresult BackupManagerImplementation::BackupSettings(const Exchange::BackupContext& context)
     {
         LOGINFO("BackupSettings scenario [%d] with persistentPath [%s] and variant [%s]", context.scenario, context.persistentPath.c_str(), context.variant.c_str());
+
+        if (!context.persistentPath.empty() && !isValidBackupPath(context.persistentPath))
+        {
+            LOGERR("Invalid persistentPath");
+            return Core::ERROR_INVALID_PARAMETER;
+        }
 
         Exchange::BackupContext providerContext = context;
         MakeContext(context, providerContext);
@@ -125,6 +227,12 @@ namespace Plugin {
     Core::hresult BackupManagerImplementation::RestoreSettings(const Exchange::BackupContext& context)
     {
         LOGINFO("RestoreSettings scenario [%d] with persistentPath [%s] and variant [%s]", context.scenario, context.persistentPath.c_str(), context.variant.c_str());
+
+        if (!context.persistentPath.empty() && !isValidBackupPath(context.persistentPath))
+        {
+            LOGERR("Invalid persistentPath");
+            return Core::ERROR_INVALID_PARAMETER;
+        }
  
         Exchange::BackupContext providerContext = context;
         MakeContext(context, providerContext);
@@ -149,6 +257,12 @@ namespace Plugin {
     Core::hresult BackupManagerImplementation::DeleteBackup(const Exchange::BackupContext& context)
     {
         LOGINFO("DeleteBackup scenario [%d] with persistentPath [%s] and variant [%s]", context.scenario, context.persistentPath.c_str(), context.variant.c_str());
+
+        if (!context.persistentPath.empty() && !isValidBackupPath(context.persistentPath))
+        {
+            LOGERR("Invalid persistentPath");
+            return Core::ERROR_INVALID_PARAMETER;
+        }
 
         Exchange::BackupContext providerContext = context;
         MakeContext(context, providerContext);

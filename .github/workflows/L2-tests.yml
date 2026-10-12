@@ -121,6 +121,18 @@ jobs:
           path: entservices-testframework
           ref: feature/RDKEMW-25013
 
+      - name: Checkout rdk-halif-device_settings
+        uses: actions/checkout@v3
+        with:
+          repository: rdkcentral/rdk-halif-device_settings
+          path: rdk-halif-device_settings
+          ref: 6.0.1
+
+      - name: Install DeviceSettings HAL headers
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/install/usr/include"
+          cp -r "$GITHUB_WORKSPACE/rdk-halif-device_settings/include/." "$GITHUB_WORKSPACE/install/usr/include/"
+
       - name: Checkout googletest
         uses: actions/checkout@v3
         with:
